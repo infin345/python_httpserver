@@ -1,4 +1,2 @@
 dag_id
-daily_sync
-hourly_report
-example_bash_operator
+example_bash_decorator
