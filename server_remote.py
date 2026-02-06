@@ -327,16 +327,21 @@ def get_latest_dag_status(dag_id, token):
         
         with urllib.request.urlopen(req, timeout=5) as response:
             if response.status == 200:
-                data = json.loads(response.read().decode())
-                dag_runs = data.get("dag_runs", [])
-                if dag_runs:
-                    latest_run = dag_runs[0]
-                    return {
-                        "dag_id": dag_id,
-                        "dag_run_id": latest_run.get("dag_run_id"),
-                        "state": latest_run.get("state"),
-                        "execution_date": latest_run.get("execution_date")
-                    }
+                raw_data = response.read().decode()
+                try:
+                    data = json.loads(raw_data)
+                    dag_runs = data.get("dag_runs", [])
+                    if dag_runs:
+                        latest_run = dag_runs[0]
+                        return {
+                            "dag_id": dag_id,
+                            "dag_run_id": latest_run.get("dag_run_id"),
+                            "state": latest_run.get("state"),
+                            "execution_date": latest_run.get("execution_date")
+                        }
+                except json.JSONDecodeError:
+                    print(f"Error: Expected JSON but got something else from {url}")
+                    print(f"First 500 chars: {raw_data[:500]}")
     except Exception as e:
         print(f"Error fetching dag status for {dag_id}: {e}")
     
